@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+}
+
+group 'com.hunterwb'
+version '0.1.0-SNAPSHOT'
+
+repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+}
+
+configurations {
+    serviceScanner
+}
+
+dependencies {
+    serviceScanner "com.hunterwb:service-scanner:${project.version}"
+}
+
+compileJava {
+    options.annotationProcessorPath = configurations.serviceScanner
+    options.compilerArgs.addAll(['--release', '6'])
+    options.compilerArgs.add('-Aservices=com.example.Service1,com.example.Service2')
+}

@@ -14,3 +14,4 @@ jobs:
             mvn install --batch-mode --errors
             cd maven-example && mvn install --batch-mode --errors && cd ..
             cd gradle-example && gradle build --stacktrace && cd ..
+            cd tests && mvn install --batch-mode --errors && cd ..

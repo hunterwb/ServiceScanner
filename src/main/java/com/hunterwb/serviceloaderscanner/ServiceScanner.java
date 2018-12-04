@@ -3,13 +3,22 @@ package com.hunterwb.serviceloaderscanner;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.ServiceLoader;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * Processes all types for {@link ServiceLoader} providers and generates their configuration files.
@@ -67,13 +76,25 @@ public final class ServiceScanner extends UniversalProcessor {
     private boolean isServiceProviderCandidate(Element e) {
         return e.getKind() == ElementKind.CLASS &&
                 !e.getModifiers().contains(Modifier.ABSTRACT) &&
-                e.getSimpleName().length() != 0;
+                e.getSimpleName().length() != 0 &&
+                hasDefaultConstructor((TypeElement) e);
     }
 
     private boolean isSubType(TypeMirror sub, String parentName) {
         if (elements().getBinaryName((TypeElement) types().asElement(sub)).contentEquals(parentName)) return true;
         for (TypeMirror ds : types().directSupertypes(sub)) {
             if (isSubType(ds, parentName)) return true;
+        }
+        return false;
+    }
+
+    private boolean hasDefaultConstructor(TypeElement t) {
+        for (Element enclosed : t.getEnclosedElements()) {
+            if (enclosed.getKind() != ElementKind.CONSTRUCTOR) continue;
+            ExecutableElement constructor = (ExecutableElement) enclosed;
+            if (!constructor.getModifiers().contains(Modifier.PUBLIC)) continue;
+            if (!constructor.getParameters().isEmpty()) continue;
+            return true;
         }
         return false;
     }

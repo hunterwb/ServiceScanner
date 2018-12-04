@@ -7,8 +7,7 @@ version '0.1.1-SNAPSHOT'
 
 repositories {
     mavenLocal()
-    jcenter()
-    mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 configurations {

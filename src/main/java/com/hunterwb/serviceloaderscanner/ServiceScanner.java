@@ -5,6 +5,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
@@ -58,26 +59,28 @@ public final class ServiceScanner extends UniversalProcessor {
     }
 
     private void process(Element e) {
-        if (isServiceProviderCandidate(e)) {
+        if (!(e instanceof TypeElement)) return;
+        TypeElement t = (TypeElement) e;
+        if (isServiceProviderCandidate(t)) {
             for (Map.Entry<String, Set<String>> entry : serviceProviders.entrySet()) {
                 String service = entry.getKey();
                 Set<String> providers = entry.getValue();
 
-                if (isSubType(e.asType(), service)) {
-                    providers.add(elements().getBinaryName((TypeElement) e).toString());
+                if (isSubType(t.asType(), service)) {
+                    providers.add(elements().getBinaryName(t).toString());
                 }
             }
         }
-        for (Element enc : e.getEnclosedElements()) {
+        for (Element enc : t.getEnclosedElements()) {
             process(enc);
         }
     }
 
-    private boolean isServiceProviderCandidate(Element e) {
-        return e.getKind() == ElementKind.CLASS &&
+    private boolean isServiceProviderCandidate(TypeElement e) {
+        return e.getModifiers().contains(Modifier.PUBLIC) &&
                 !e.getModifiers().contains(Modifier.ABSTRACT) &&
-                e.getSimpleName().length() != 0 &&
-                hasDefaultConstructor((TypeElement) e);
+                (e.getNestingKind() == NestingKind.TOP_LEVEL || e.getModifiers().contains(Modifier.STATIC)) &&
+                hasDefaultConstructor(e);
     }
 
     private boolean isSubType(TypeMirror sub, String parentName) {

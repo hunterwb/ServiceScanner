@@ -11,7 +11,14 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
 
-public final class ServiceScanner extends Scanner {
+/**
+ * Processes all types for {@link ServiceLoader} providers and generates their configuration files.
+ * <p>
+ * Processor Options:<ul>
+ *     <li>services - comma delimited list of the fully qualified binary names of the services to look for</li>
+ * </ul>
+ */
+public final class ServiceScanner extends UniversalProcessor {
 
     private final Map<String, Set<String>> serviceProviders = new TreeMap<String, Set<String>>();
 
@@ -22,7 +29,7 @@ public final class ServiceScanner extends Scanner {
 
     @Override
     public void init() {
-        String services = options().get("services");
+        String services = option("services");
         if (services == null || services.isEmpty()) {
             log(Diagnostic.Kind.WARNING, "No services configured. Add services by passing their fully qualified binary names to javac in the following format:");
             log(Diagnostic.Kind.WARNING, "-Aservices=com.example.Service1,com.example.Service2");
@@ -87,8 +94,8 @@ public final class ServiceScanner extends Scanner {
                 OutputStream out = openFileOutput(serviceFileName);
                 try {
                     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, utf8));
-                    for (String newService : providers) {
-                        writer.write(newService);
+                    for (String provider : providers) {
+                        writer.write(provider);
                         writer.newLine();
                     }
                     writer.flush();

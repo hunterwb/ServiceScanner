@@ -14,13 +14,14 @@ import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import javax.tools.StandardLocation;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 
-public abstract class Scanner implements Processor {
+/**
+ * A <i>universal processor</i> as described in {@link Processor} which supports processing all types.
+ */
+public abstract class UniversalProcessor implements Processor {
 
     private ProcessingEnvironment processingEnv;
 
@@ -71,8 +72,8 @@ public abstract class Scanner implements Processor {
         return processingEnv.getTypeUtils();
     }
 
-    final Map<String, String> options() {
-        return processingEnv.getOptions();
+    final String option(String option) {
+        return processingEnv.getOptions().get(option);
     }
 
     final void log(Diagnostic.Kind kind, String message) {

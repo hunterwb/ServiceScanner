@@ -1,0 +1,16 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/openjdk:11-jdk-sid
+
+    working_directory: ~/repo
+    
+    steps:
+      - checkout
+
+      - run:
+          command: |
+            mvn install --batch-mode --errors
+            cd maven-example && mvn install --batch-mode --errors && cd ..
+            cd gradle-example && gradle build --stacktrace && cd ..

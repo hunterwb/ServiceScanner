@@ -50,9 +50,7 @@ abstract class UniversalProcessor implements Processor {
 
     @Override
     public final boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        if (roundEnv.errorRaised()) {
-            //
-        } else if (roundEnv.processingOver()) {
+        if (roundEnv.processingOver()) {
             end();
         } else {
             process(roundEnv);

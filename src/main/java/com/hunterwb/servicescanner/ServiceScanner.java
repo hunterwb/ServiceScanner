@@ -1,4 +1,4 @@
-package com.hunterwb.serviceloaderscanner;
+package com.hunterwb.servicescanner;
 
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;

@@ -1,4 +1,4 @@
-package com.hunterwb.serviceloaderscanner;
+package com.hunterwb.servicescanner;
 
 import javax.annotation.processing.Completion;
 import javax.annotation.processing.ProcessingEnvironment;

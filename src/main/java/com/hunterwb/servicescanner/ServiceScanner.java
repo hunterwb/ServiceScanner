@@ -41,7 +41,7 @@ public final class ServiceScanner extends UniversalProcessor {
     public void init() {
         String services = option("services");
         if (services == null || services.isEmpty()) {
-            log(Diagnostic.Kind.WARNING, "No services configured. Add services by passing their fully qualified binary names to javac in the following format:");
+            log(Diagnostic.Kind.WARNING, "No services added. Add services by passing their fully qualified binary names to javac in the following format:");
             log(Diagnostic.Kind.WARNING, "-Aservices=com.example.Service1,com.example.Service2");
             return;
         }
@@ -121,7 +121,7 @@ public final class ServiceScanner extends UniversalProcessor {
         for (Map.Entry<String, Set<String>> entry : serviceProviders.entrySet()) {
             String service = entry.getKey();
             Set<String> providers = entry.getValue();
-            log(Diagnostic.Kind.NOTE, "Found service providers " + providers + " for service " + service);
+            log(Diagnostic.Kind.NOTE, "Found providers " + providers + " for service " + service);
             String serviceFileName = "META-INF/services/" + service;
 
             if (fileExists(serviceFileName)) {

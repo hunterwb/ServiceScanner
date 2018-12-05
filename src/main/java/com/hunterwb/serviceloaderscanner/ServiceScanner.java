@@ -54,13 +54,16 @@ public final class ServiceScanner extends UniversalProcessor {
     public void process(RoundEnvironment roundEnv) {
         if (serviceProviders.isEmpty()) return;
         for (Element e : roundEnv.getRootElements()) {
-            process(e);
+            // skip packages / modules
+            if (isType(e)) {
+                TypeElement t = (TypeElement) e;
+                // assert t.getNestingKind() == NestingKind.TOP_LEVEL;
+                process(t);
+            }
         }
     }
 
-    private void process(Element e) {
-        if (!(e instanceof TypeElement)) return;
-        TypeElement t = (TypeElement) e;
+    private void process(TypeElement t) {
         if (isServiceProviderCandidate(t)) {
             for (Map.Entry<String, Set<String>> entry : serviceProviders.entrySet()) {
                 String service = entry.getKey();
@@ -71,16 +74,26 @@ public final class ServiceScanner extends UniversalProcessor {
                 }
             }
         }
-        for (Element enc : t.getEnclosedElements()) {
-            process(enc);
+        for (Element enclosed : t.getEnclosedElements()) {
+            if (isType(enclosed)) {
+                TypeElement enclosedType = (TypeElement) enclosed;
+                // assert enclosedType.getNestingKind() == NestingKind.MEMBER;
+                process(enclosedType);
+            }
         }
     }
 
     private boolean isServiceProviderCandidate(TypeElement e) {
-        return e.getModifiers().contains(Modifier.PUBLIC) &&
+        return e.getKind() == ElementKind.CLASS &&
+                e.getModifiers().contains(Modifier.PUBLIC) &&
                 !e.getModifiers().contains(Modifier.ABSTRACT) &&
                 (e.getNestingKind() == NestingKind.TOP_LEVEL || e.getModifiers().contains(Modifier.STATIC)) &&
                 hasDefaultConstructor(e);
+    }
+
+    private static boolean isType(Element e) {
+        ElementKind k = e.getKind();
+        return k.isClass() || k.isInterface();
     }
 
     private boolean isSubType(TypeMirror sub, String parentName) {

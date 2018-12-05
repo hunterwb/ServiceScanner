@@ -3,9 +3,9 @@
 [![](https://jitpack.io/v/com.hunterwb/service-scanner.svg)](https://jitpack.io/#com.hunterwb/service-scanner)
 [![Build Status](https://img.shields.io/circleci/project/github/hunterwb/service-scanner.svg)](https://circleci.com/gh/hunterwb/service-scanner)
 
-A Java 6 annotation [processor](https://docs.oracle.com/javase/8/docs/api/javax/annotation/processing/Processor.html) which checks every class during compilation to determine if it is a [ServiceLoader](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html) provider and if so, adds it name to the `META-INF/services` configuration file.
+A Java 6 annotation [processor](https://docs.oracle.com/javase/8/docs/api/javax/annotation/processing/Processor.html) which checks every class during compilation to determine if it is a [ServiceLoader](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html) provider and if so, adds its name to the `META-INF/services` configuration file.
 
-The fully qualified [binary names](https://docs.oracle.com/javase/specs/jls/se8/html/jls-13.html#jls-13.1) of the services to look for must be passed to `javac` in the format
+The fully qualified [binary names](https://docs.oracle.com/javase/specs/jls/se8/html/jls-13.html#jls-13.1) of the services to look for must be passed to `javac` in the format:
 
 `-Aservices=com.example.Service1,com.example.Service2`
 

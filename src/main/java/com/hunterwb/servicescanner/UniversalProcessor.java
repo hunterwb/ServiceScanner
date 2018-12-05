@@ -21,7 +21,7 @@ import java.util.Set;
 /**
  * A <i>universal processor</i> as described in {@link Processor} which supports processing all types.
  */
-public abstract class UniversalProcessor implements Processor {
+abstract class UniversalProcessor implements Processor {
 
     private ProcessingEnvironment processingEnv;
 

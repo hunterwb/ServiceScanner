@@ -44,7 +44,7 @@
                     </annotationProcessorPaths>
                     <showWarnings>true</showWarnings>
                     <compilerArgs>
-                        <arg>-Aservices=com.example.InterfaceService,com.example.AbstractService,com.example.ConcreteService,com.example.NoProvidersService,com.example.SelfService</arg>
+                        <arg>-Aservices=com.example.InterfaceService,com.example.AbstractService,com.example.ConcreteService,com.example.NoProvidersService,com.example.SelfService,com.example.Enum1$Service</arg>
                     </compilerArgs>
                     <release>6</release>
                 </configuration>

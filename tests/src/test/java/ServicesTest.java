@@ -52,6 +52,14 @@ class ServicesTest {
                 ),
                 providers(SelfService.class)
         );
+        Assertions.assertEquals(
+                setOf(
+                        Enum1._1.class,
+                        Enum1._1._2.class,
+                        Enum1.Ann._3.class
+                ),
+                providers(Enum1.Service.class)
+        );
     }
 
     private Set<Class<?>> providers(Class<?> service) {

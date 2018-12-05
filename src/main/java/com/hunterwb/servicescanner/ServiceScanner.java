@@ -115,6 +115,7 @@ public final class ServiceScanner extends UniversalProcessor {
         return false;
     }
 
+    @Override
     public void end() {
         Charset utf8 = Charset.forName("UTF-8");
         for (Map.Entry<String, Set<String>> entry : serviceProviders.entrySet()) {

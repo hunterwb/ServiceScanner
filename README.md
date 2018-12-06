@@ -30,7 +30,7 @@ The fully qualified [binary names](https://docs.oracle.com/javase/specs/jls/se8/
                     <path>
                         <groupId>com.hunterwb</groupId>
                         <artifactId>service-scanner</artifactId>
-                        <version>0.1.1</version>
+                        <version>0.1.2</version>
                     </path>
                 </annotationProcessorPaths>
                 <showWarnings>true</showWarnings>
@@ -55,7 +55,7 @@ configurations {
 }
 
 dependencies {
-    serviceScanner 'com.hunterwb:service-scanner:0.1.1'
+    serviceScanner 'com.hunterwb:service-scanner:0.1.2'
 }
 
 compileJava {

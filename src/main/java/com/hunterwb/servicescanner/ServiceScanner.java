@@ -38,7 +38,7 @@ public final class ServiceScanner extends UniversalProcessor {
     }
 
     @Override
-    public void init() {
+    void init() {
         String services = option("services");
         if (services == null || services.isEmpty()) {
             log(Diagnostic.Kind.WARNING, "No services added. Add services by passing their fully qualified binary names to javac in the following format:");
@@ -51,7 +51,7 @@ public final class ServiceScanner extends UniversalProcessor {
     }
 
     @Override
-    public void process(RoundEnvironment roundEnv) {
+    void process(RoundEnvironment roundEnv) {
         if (serviceProviders.isEmpty()) return;
         for (Element e : roundEnv.getRootElements()) {
             // skip packages / modules
@@ -116,7 +116,7 @@ public final class ServiceScanner extends UniversalProcessor {
     }
 
     @Override
-    public void end() {
+    void end() {
         Charset utf8 = Charset.forName("UTF-8");
         for (Map.Entry<String, Set<String>> entry : serviceProviders.entrySet()) {
             String service = entry.getKey();

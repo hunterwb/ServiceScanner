@@ -31,7 +31,7 @@ abstract class UniversalProcessor implements Processor {
         init();
     }
 
-    void init() {}
+    abstract void init();
 
     @Override
     public final Set<String> getSupportedAnnotationTypes() {
@@ -58,9 +58,9 @@ abstract class UniversalProcessor implements Processor {
         return false;
     }
 
-    void process(RoundEnvironment roundEnv) {}
+    abstract void process(RoundEnvironment roundEnv);
 
-    void end() {}
+    abstract void end();
 
     final Elements elements() {
         return processingEnv.getElementUtils();

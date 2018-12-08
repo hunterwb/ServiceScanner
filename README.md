@@ -51,7 +51,7 @@ repositories {
 }
 
 dependencies {
-    annotationProcessor "com.hunterwb:service-scanner:${project.version}"
+    annotationProcessor 'com.hunterwb:service-scanner:0.1.2'
 }
 
 compileJava {

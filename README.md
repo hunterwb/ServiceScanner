@@ -50,16 +50,11 @@ repositories {
     maven { url 'https://jitpack.io' }
 }
 
-configurations {
-    serviceScanner
-}
-
 dependencies {
-    serviceScanner 'com.hunterwb:service-scanner:0.1.2'
+    annotationProcessor "com.hunterwb:service-scanner:${project.version}"
 }
 
 compileJava {
-    options.annotationProcessorPath = configurations.serviceScanner
     options.compilerArgs.add('-Aservices=com.example.Service1,com.example.Service2')
 }
 ```

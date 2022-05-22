@@ -1,36 +1,24 @@
-# service-scanner
+# ServiceScanner
 
-[![](https://jitpack.io/v/com.hunterwb/service-scanner.svg)](https://jitpack.io/#com.hunterwb/service-scanner)
-[![Build Status](https://img.shields.io/circleci/project/github/hunterwb/service-scanner.svg)](https://circleci.com/gh/hunterwb/service-scanner)
+Automatically configure ServiceLoader providers
 
-A Java 6 annotation [processor](https://docs.oracle.com/javase/8/docs/api/javax/annotation/processing/Processor.html) which checks every class during compilation to determine if it is a [ServiceLoader](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html) provider and if so, adds its name to the `META-INF/services` configuration file.
-
-The fully qualified [binary names](https://docs.oracle.com/javase/specs/jls/se8/html/jls-13.html#jls-13.1) of the services to look for must be passed to `javac` in the format:
-
-`-Aservices=com.example.Service1,com.example.Service2`
+A Java annotation processor which automatically discovers all [ServiceLoader](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html) providers and generates the`META-INF/services` provider-configuration files. A class is determined to be a service provider if it has a public no-argument constructor and [is assignable to](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html#isAssignableFrom-java.lang.Class-) a service type. The canonical names of all services must be passed to `javac` (examples below). Supports Java 6+.
 
 ##### Maven usage:
 
 ```xml
-<repositories>
-    <repository>
-        <id>jitpack.io</id>
-        <url>https://jitpack.io</url>
-    </repository>
-</repositories>
-
 <build>
     <plugins>
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.8.0</version>
+            <version>3.10.1</version>
             <configuration>
                 <annotationProcessorPaths>
                     <path>
                         <groupId>com.hunterwb</groupId>
-                        <artifactId>service-scanner</artifactId>
-                        <version>0.1.2</version>
+                        <artifactId>servicescanner</artifactId>
+                        <version>0.1.3</version>
                     </path>
                 </annotationProcessorPaths>
                 <showWarnings>true</showWarnings>
@@ -46,12 +34,8 @@ The fully qualified [binary names](https://docs.oracle.com/javase/specs/jls/se8/
 ##### Gradle usage:
 
 ```groovy
-repositories {
-    maven { url 'https://jitpack.io' }
-}
-
 dependencies {
-    annotationProcessor 'com.hunterwb:service-scanner:0.1.2'
+    annotationProcessor 'com.hunterwb:servicescanner:0.1.3'
 }
 
 compileJava {

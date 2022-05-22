@@ -10,6 +10,7 @@ public interface InterfaceService {
     class _4 implements F {}
     class _5$ extends B {}
     class _6 extends _1 {}
+    class _7<T> implements InterfaceService {}
 
     class A implements InterfaceService {
         private A() {

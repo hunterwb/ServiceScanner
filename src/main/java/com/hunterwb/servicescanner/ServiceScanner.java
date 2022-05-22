@@ -1,149 +1,197 @@
 package com.hunterwb.servicescanner;
 
+import javax.annotation.processing.Completion;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.SourceVersion;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
+import javax.tools.StandardLocation;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.ServiceLoader;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
-/**
- * Processes all types for {@link ServiceLoader} providers and generates their configuration files.
- * <p>
- * Processor Options:<ul>
- *     <li>services - comma delimited list of the fully qualified binary names of the services to look for</li>
- * </ul>
- */
-public final class ServiceScanner extends UniversalProcessor {
+public final class ServiceScanner implements Processor {
 
-    private final Map<String, Set<String>> serviceProviders = new TreeMap<String, Set<String>>();
+    private final Map<TypeElement, Set<TypeElement>> serviceProviders = new LinkedHashMap<TypeElement, Set<TypeElement>>();
 
-    @Override
-    public Set<String> getSupportedOptions() {
+    private ProcessingEnvironment env;
+
+    @Override public Set<String> getSupportedOptions() {
         return Collections.singleton("services");
     }
 
-    @Override
-    void init() {
-        String services = option("services");
-        if (services == null || services.isEmpty()) {
-            log(Diagnostic.Kind.WARNING, "No services added. Add services by passing their fully qualified binary names to javac in the following format:");
-            log(Diagnostic.Kind.WARNING, "-Aservices=com.example.Service1,com.example.Service2");
-            return;
-        }
-        for (String service : services.split(",")) {
-            serviceProviders.put(service, new TreeSet<String>());
+    @Override public Set<String> getSupportedAnnotationTypes() {
+        return Collections.singleton("*");
+    }
+
+    @Override public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latestSupported();
+    }
+
+    @Override public Iterable<? extends Completion> getCompletions(Element element, AnnotationMirror annotation, ExecutableElement member, String userText) {
+        return Collections.emptyList();
+    }
+
+    @Override public void init(ProcessingEnvironment processingEnv) {
+        if (processingEnv == null) throw new NullPointerException();
+        if (env != null) throw new IllegalStateException();
+        env = processingEnv;
+        try {
+            init();
+        } catch (Exception e) {
+            error(getStackTraceAsString(e));
         }
     }
 
-    @Override
-    void process(RoundEnvironment roundEnv) {
-        if (serviceProviders.isEmpty()) return;
-        for (Element e : roundEnv.getRootElements()) {
-            // skip packages / modules
-            if (isType(e)) {
-                TypeElement t = (TypeElement) e;
-                // assert t.getNestingKind() == NestingKind.TOP_LEVEL;
-                process(t);
-            }
-        }
-    }
-
-    private void process(TypeElement t) {
-        if (isServiceProviderCandidate(t)) {
-            for (Map.Entry<String, Set<String>> entry : serviceProviders.entrySet()) {
-                String service = entry.getKey();
-                Set<String> providers = entry.getValue();
-
-                if (isSubType(t.asType(), service)) {
-                    providers.add(elements().getBinaryName(t).toString());
+    private void init() {
+        String servicesOption = env.getOptions().get("services");
+        if (servicesOption == null) {
+            warning("No services added. Add services by passing their canonical names to javac in the following format: -Aservices=com.example.Service1,com.example.Service2");
+        } else {
+            for (String serviceString : servicesOption.split(",")) {
+                TypeElement service = env.getElementUtils().getTypeElement(serviceString);
+                if (service == null) {
+                    error("Cannot find class with canonical name \"" + serviceString + '"');
+                } else {
+                    serviceProviders.put(service, new HashSet<TypeElement>());
                 }
             }
         }
-        for (Element enclosed : t.getEnclosedElements()) {
-            if (isType(enclosed)) {
-                TypeElement enclosedType = (TypeElement) enclosed;
-                // assert enclosedType.getNestingKind() == NestingKind.MEMBER;
-                process(enclosedType);
-            }
-        }
     }
 
-    private boolean isServiceProviderCandidate(TypeElement e) {
-        return e.getKind() == ElementKind.CLASS &&
-                e.getModifiers().contains(Modifier.PUBLIC) &&
-                !e.getModifiers().contains(Modifier.ABSTRACT) &&
-                (e.getNestingKind() == NestingKind.TOP_LEVEL || e.getModifiers().contains(Modifier.STATIC)) &&
-                hasDefaultConstructor(e);
-    }
-
-    private static boolean isType(Element e) {
-        ElementKind k = e.getKind();
-        return k.isClass() || k.isInterface();
-    }
-
-    private boolean isSubType(TypeMirror sub, String parentName) {
-        if (elements().getBinaryName((TypeElement) types().asElement(sub)).contentEquals(parentName)) return true;
-        for (TypeMirror ds : types().directSupertypes(sub)) {
-            if (isSubType(ds, parentName)) return true;
-        }
-        return false;
-    }
-
-    private boolean hasDefaultConstructor(TypeElement t) {
-        for (Element enclosed : t.getEnclosedElements()) {
-            if (enclosed.getKind() != ElementKind.CONSTRUCTOR) continue;
-            ExecutableElement constructor = (ExecutableElement) enclosed;
-            if (!constructor.getModifiers().contains(Modifier.PUBLIC)) continue;
-            if (!constructor.getParameters().isEmpty()) continue;
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    void end() {
-        Charset utf8 = Charset.forName("UTF-8");
-        for (Map.Entry<String, Set<String>> entry : serviceProviders.entrySet()) {
-            String service = entry.getKey();
-            Set<String> providers = entry.getValue();
-            log(Diagnostic.Kind.NOTE, "Found providers " + providers + " for service " + service);
-            String serviceFileName = "META-INF/services/" + service;
-
-            if (fileExists(serviceFileName)) {
-                log(Diagnostic.Kind.WARNING, "Overwriting file " + serviceFileName);
-            }
-
+    @Override public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        if (!serviceProviders.isEmpty()) {
             try {
-                OutputStream out = openFileOutput(serviceFileName);
-                try {
-                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, utf8));
-                    for (String provider : providers) {
-                        writer.write(provider);
-                        writer.newLine();
-                    }
-                    writer.flush();
-                } finally {
-                    out.close();
+                if (roundEnv.processingOver()) {
+                    writeServices();
+                } else {
+                    processElements(roundEnv.getRootElements());
                 }
-            } catch (IOException e) {
-                log(Diagnostic.Kind.ERROR, e.toString());
-                return;
+            } catch (Exception e) {
+                error(getStackTraceAsString(e));
             }
         }
+        return false;
+    }
+
+    private void processElements(Iterable<? extends Element> elements) {
+        for (Element e : elements) {
+            if (isDeclaredType(e.getKind())) {
+                processTypeElement((TypeElement) e);
+                processElements(e.getEnclosedElements());
+            }
+        }
+    }
+
+    private void processTypeElement(TypeElement e) {
+        if (hasDefaultConstructor(e)) {
+            for (TypeElement service : serviceProviders.keySet()) {
+                if (isAssignable(e, service)) {
+                    serviceProviders.get(service).add(e);
+                }
+            }
+        }
+    }
+
+    private void writeServices() throws IOException {
+        for (Map.Entry<TypeElement, Set<TypeElement>> e : serviceProviders.entrySet()) {
+            writeService(e.getKey(), e.getValue());
+        }
+    }
+
+    private void writeService(TypeElement service, Set<TypeElement> providers) throws IOException {
+        String s = binaryName(service);
+        Set<String> ps = new TreeSet<String>();
+        for (TypeElement provider : providers) {
+            ps.add(binaryName(provider));
+        }
+
+        note("Found providers " + ps + " for service " + s);
+        if (ps.isEmpty()) return;
+
+        String fileName = "META-INF/services/" + s;
+        OutputStream outputStream = env.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", fileName).openOutputStream();
+        IOException e = null;
+        try {
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
+            for (String p : ps) {
+                bw.write(p);
+                bw.newLine();
+            }
+            bw.flush();
+        } catch (IOException writeException) {
+            e = writeException;
+        }
+        try {
+            outputStream.close();
+        } catch (IOException closeException) {
+            if (e == null) e = closeException;
+        }
+        if (e != null) throw e;
+    }
+
+    private void note(String msg) {
+        env.getMessager().printMessage(Diagnostic.Kind.NOTE, msg);
+    }
+
+    private void warning(String msg) {
+        env.getMessager().printMessage(Diagnostic.Kind.WARNING, msg);
+    }
+
+    private void error(String msg) {
+        env.getMessager().printMessage(Diagnostic.Kind.ERROR, msg);
+    }
+
+    private String binaryName(TypeElement type) {
+        return env.getElementUtils().getBinaryName(type).toString();
+    }
+
+    private boolean isAssignable(TypeElement from, TypeElement to) {
+        Types types = env.getTypeUtils();
+        return types.isSubtype(from.asType(), types.erasure(to.asType()));
+    }
+
+    private static boolean isDeclaredType(ElementKind elementKind) {
+        return elementKind.isClass() || elementKind.isInterface();
+    }
+
+    private static boolean hasDefaultConstructor(TypeElement t) {
+        if (!t.getKind().isClass()) return false;
+        Set<Modifier> modifiers = t.getModifiers();
+        if (!modifiers.contains(Modifier.PUBLIC)) return false;
+        if (modifiers.contains(Modifier.ABSTRACT)) return false;
+        if (t.getNestingKind().isNested() && !modifiers.contains(Modifier.STATIC)) return false;
+        for (Element e : t.getEnclosedElements()) {
+            if (e.getKind() == ElementKind.CONSTRUCTOR) {
+                ExecutableElement c = (ExecutableElement) e;
+                if (c.getModifiers().contains(Modifier.PUBLIC) && c.getParameters().isEmpty()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static String getStackTraceAsString(Throwable throwable) {
+        StringWriter stringWriter = new StringWriter();
+        throwable.printStackTrace(new PrintWriter(stringWriter));
+        return stringWriter.toString();
     }
 }

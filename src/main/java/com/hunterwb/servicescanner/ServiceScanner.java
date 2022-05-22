@@ -27,6 +27,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+/**
+ * Automatically configure ServiceLoader providers
+ * <p>
+ * A Java annotation processor which automatically discovers all {@code ServiceLoader} providers and generates the
+ * {@code META-INF/services} provider-configuration files. A class is determined to be a service provider if it has a
+ * public no-argument constructor and is assignable to a service type. The canonical names of all services must be
+ * passed to {@code javac} using the following format:
+ * {@code -Aservices=com.example.Service1,com.example.Service2}. Supports Java 6+.
+ */
 public final class ServiceScanner implements Processor {
 
     private final Map<TypeElement, Set<TypeElement>> serviceProviders = new LinkedHashMap<TypeElement, Set<TypeElement>>();

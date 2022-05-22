@@ -2,7 +2,7 @@
 
 Automatically configure ServiceLoader providers
 
-A Java annotation processor which automatically discovers all [ServiceLoader](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html) providers and generates the`META-INF/services` provider-configuration files. A class is determined to be a service provider if it has a public no-argument constructor and [is assignable to](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html#isAssignableFrom-java.lang.Class-) a service type. The canonical names of all services must be passed to `javac` (examples below). Supports Java 6+.
+A Java [annotation processor](https://docs.oracle.com/javase/8/docs/api/javax/annotation/processing/Processor.html) which automatically discovers all [ServiceLoader](https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html) providers and generates the `META-INF/services` provider-configuration files. A class is determined to be a service provider if it has a public no-argument constructor and [is assignable to](https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html#isAssignableFrom-java.lang.Class-) a service type. The canonical names of all services must be passed to `javac` using the following format: `-Aservices=com.example.Service1,com.example.Service2`. Supports Java 6+.
 
 ##### Maven usage:
 

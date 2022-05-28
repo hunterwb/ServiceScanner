@@ -39,7 +39,8 @@
                     <compilerArgs>
                         <arg>-Aservices=com.example.InterfaceService,com.example.AbstractService,com.example.ConcreteService,com.example.NoProvidersService,com.example.SelfService,com.example.Enum1.Service,com.example.GenericService,java.util.RandomAccess,java.lang.Cloneable</arg>
                     </compilerArgs>
-                    <release>11</release>
+                    <source>${java.specification.version}</source>
+                    <target>${java.specification.version}</target>
                 </configuration>
             </plugin>
             <plugin>

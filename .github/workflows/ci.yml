@@ -14,6 +14,6 @@ jobs:
           java-version: ${{ matrix.java }}
           distribution: 'temurin'
       - run: mvn --version
-      - run: mvn install --errors --batch-mode
+      - run: mvn install --errors --batch-mode -Dgpg.skip
       - run: mvn test --errors --batch-mode
         working-directory: test

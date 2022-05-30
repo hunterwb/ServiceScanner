@@ -8,9 +8,8 @@ import com.example.Provider1;
 import com.example.Provider2;
 import com.example.Provider3;
 import com.example.Provider4;
+import com.example.Provider5;
 import com.example.SelfService;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -20,7 +19,7 @@ import java.util.Set;
 
 public final class ServicesTest {
 
-    @Test public void interfaceService() {
+    public void testInterfaceService() {
         check(
                 InterfaceService.class,
                 InterfaceService._1.class,
@@ -35,7 +34,7 @@ public final class ServicesTest {
         );
     }
 
-    @Test public void abstractService() {
+    public void testAbstractService() {
         check(
                 AbstractService.class,
                 AbstractService._1.class,
@@ -43,11 +42,12 @@ public final class ServicesTest {
                 AbstractService._3.class,
                 AbstractService._4.class,
                 AbstractService._5.class,
-                Provider2.class
+                Provider2.class,
+                Provider5.class
         );
     }
 
-    @Test public void concreteService() {
+    public void testConcreteService() {
         check(
                 ConcreteService.class,
                 ConcreteService._1.class,
@@ -56,11 +56,11 @@ public final class ServicesTest {
         );
     }
 
-    @Test public void noProviders() {
+    public void testNoProviders() {
         check(NoProvidersService.class);
     }
 
-    @Test public void selfService() {
+    public void testSelfService() {
         check(
                 SelfService.class,
                 SelfService.class,
@@ -69,7 +69,7 @@ public final class ServicesTest {
         );
     }
 
-    @Test public void innerService() {
+    public void testInnerService() {
         check(
                 Enum1.Service.class,
                 Enum1._1.class,
@@ -78,7 +78,7 @@ public final class ServicesTest {
         );
     }
 
-    @Test public void genericService() {
+    public void testGenericService() {
         check(
                 GenericService.class,
                 GenericService._1.class,
@@ -92,18 +92,18 @@ public final class ServicesTest {
         );
     }
 
-    @Test public void jdkService() {
+    public void testJdkService() {
         check(RandomAccess.class, Provider4.class);
     }
 
-    @Test public void jdkServiceNoProviders() {
+    public void testJdkServiceNoProviders() {
         check(Cloneable.class);
     }
 
     private static void check(Class<?> service, Class<?>... providers) {
-        Set<Class<?>> expected = new LinkedHashSet<>(Arrays.asList(providers));
-        Set<Class<?>> actual = new LinkedHashSet<>();
+        Set<Class<?>> expected = new LinkedHashSet<Class<?>>(Arrays.asList(providers));
+        Set<Class<?>> actual = new LinkedHashSet<Class<?>>();
         for (Object p : ServiceLoader.load(service)) actual.add(p.getClass());
-        Assertions.assertEquals(expected, actual);
+        assert actual.equals(expected) : actual;
     }
 }

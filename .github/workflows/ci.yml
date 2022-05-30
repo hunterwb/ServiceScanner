@@ -6,14 +6,29 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: [ '8', '11', '17' ]
+        java: [ '8', '11', '17', '18' ]
+        distribution: [ 'temurin' ]
+        include:
+          - java: '7'
+            distribution: 'zulu'
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v3
         with:
           java-version: ${{ matrix.java }}
-          distribution: 'temurin'
+          distribution: ${{ matrix.distribution }}
       - run: mvn --version
-      - run: mvn install --errors --batch-mode -Dgpg.skip
-      - run: mvn test --errors --batch-mode
-        working-directory: test
+      - run: mvn package --errors --batch-mode
+  java6:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: stCarolas/setup-maven@v4.3
+        with:
+          maven-version: '3.2.5'
+      - uses: actions/setup-java@v3
+        with:
+          java-version: '6'
+          distribution: 'zulu'
+      - run: mvn --version
+      - run: mvn package --errors --batch-mode --settings .github/workflows/nossl.settings.xml

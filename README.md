@@ -12,7 +12,7 @@ A Java [annotation processor](https://docs.oracle.com/javase/8/docs/api/javax/an
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.10.1</version>
+            <version>3.8.1</version>
             <configuration>
                 <annotationProcessorPaths>
                     <path>
